@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Movie Success Prediction Dashboard</title>
+  <meta name="description" content="AI-powered movie hit/flop prediction dashboard with rich data visualizations. Enter movie details and discover its box-office potential instantly." />
+
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+  <!-- Stylesheet -->
+  <link rel="stylesheet" href="/static/style.css" />
+</head>
+<body>
+
+<div class="wrapper">
+
+  <!-- ═══════════════════════════════════════════════════════════
+       HEADER
+  ════════════════════════════════════════════════════════════ -->
+  <header>
+    <div class="header-badge">🎬 AI-Powered Analytics &nbsp;·&nbsp; Smart Insights</div>
+    <h1>Movie Success<br>Prediction Dashboard</h1>
+    <p>Enter a movie's key details and our intelligent system will instantly tell you
+       whether it's likely to be a box-office <strong>Hit</strong> or a <strong>Flop</strong> —
+       backed by data from thousands of real movies.</p>
+  </header>
+
+  <!-- ── Stats strip ─────────────────────────────────────────── -->
+  <div class="stats-strip">
+    <div class="stat-chip">🎞 Movies Trained &nbsp;<span id="statMovies">…</span></div>
+    <div class="stat-chip">✅ Hits &nbsp;<span id="statHits">…</span></div>
+    <div class="stat-chip">❌ Flops &nbsp;<span id="statFlops">…</span></div>
+    <div class="stat-chip">🎯 Model Accuracy &nbsp;<span id="statAcc">…</span></div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════════
+       MAIN GRID  (left = input panel | right = charts)
+  ════════════════════════════════════════════════════════════ -->
+  <div class="main-grid">
+
+    <!-- ── LEFT COLUMN ─────────────────────────────────────── -->
+    <aside>
+
+      <!-- Input Panel -->
+      <div class="card input-panel">
+        <div class="card-title">
+          <div class="icon">🎬</div>
+          Movie Parameters
+        </div>
+
+        <!-- Budget -->
+        <div class="form-group">
+          <label for="budget">
+            Production Budget
+            <span class="tooltip" title="Total production budget in Indian Rupees (Crore)">💡 Crore ₹</span>
+          </label>
+          <div class="input-wrap">
+            <input id="budget" class="sync-input" type="number"
+                   placeholder="e.g. 125" min="0" max="4000" step="5" />
+            <span class="unit">Cr</span>
+          </div>
+          <div class="slider-wrap">
+            <input id="budget_slider" type="range" min="0" max="4000"
+                   step="5" value="0" />
+            <span class="val-label" id="budget_val">0</span>
+          </div>
+        </div>
+
+        <!-- Popularity -->
+        <div class="form-group">
+          <label for="popularity">
+            Popularity Score
+            <span class="tooltip" title="TMDB popularity index">💡 Index</span>
+          </label>
+          <div class="input-wrap">
+            <input id="popularity" class="sync-input" type="number"
+                   placeholder="e.g. 45.5" min="0" max="300" step="0.5" />
+          </div>
+          <div class="slider-wrap">
+            <input id="popularity_slider" type="range" min="0" max="300"
+                   step="0.5" value="0" />
+            <span class="val-label" id="popularity_val">0</span>
+          </div>
+        </div>
+
+        <!-- Runtime -->
+        <div class="form-group">
+          <label for="runtime">
+            Runtime
+            <span class="tooltip" title="Duration in minutes">💡 min</span>
+          </label>
+          <div class="input-wrap">
+            <input id="runtime" class="sync-input" type="number"
+                   placeholder="e.g. 120" min="60" max="240" step="1" />
+            <span class="unit">min</span>
+          </div>
+          <div class="slider-wrap">
+            <input id="runtime_slider" type="range" min="60" max="240"
+                   step="1" value="60" />
+            <span class="val-label" id="runtime_val">60</span>
+          </div>
+        </div>
+
+        <!-- Vote Average -->
+        <div class="form-group">
+          <label for="vote_average">
+            Vote Average
+            <span class="tooltip" title="TMDB audience rating (1-10)">💡 1–10</span>
+          </label>
+          <div class="input-wrap">
+            <input id="vote_average" class="sync-input" type="number"
+                   placeholder="e.g. 7.2" min="1" max="10" step="0.1" />
+            <span class="unit">/ 10</span>
+          </div>
+          <div class="slider-wrap">
+            <input id="vote_average_slider" type="range" min="1" max="10"
+                   step="0.1" value="1" />
+            <span class="val-label" id="vote_average_val">1</span>
+          </div>
+        </div>
+
+        <!-- Predict button -->
+        <button id="predictBtn" class="btn-predict">
+          <div id="spinner" class="spinner"></div>
+          <div id="btnText">🚀 Predict Success</div>
+        </button>
+
+        <!-- Reset button -->
+        <button id="resetBtn" class="btn-reset">🔄 Reset</button>
+
+        <!-- Result card -->
+        <div id="resultCard" class="result-card">
+          <div id="resultLabel" class="result-label"></div>
+          <div id="resultProb"  class="result-prob"></div>
+        </div>
+      </div>
+
+      <!-- Feature Importance (static from model) -->
+      <div class="card" style="margin-top: 20px;">
+        <div class="card-title">
+          <div class="icon">📌</div>
+          What Matters Most
+        </div>
+        <div id="featImportance"></div>
+      </div>
+
+    </aside>
+
+    <!-- ── RIGHT COLUMN ────────────────────────────────────── -->
+    <div class="right-col">
+
+      <!-- Row 1: Bar + Pie -->
+      <div class="charts-grid">
+
+        <div class="chart-card">
+          <div class="chart-label"><span class="dot"></span>📊 Input Feature Values</div>
+          <div class="chart-wrap">
+            <canvas id="barChart"></canvas>
+          </div>
+        </div>
+
+        <div class="chart-card">
+          <div class="chart-label"><span class="dot" style="background:#10b981"></span>🥧 Hit vs Flop Probability</div>
+          <div class="chart-wrap">
+            <canvas id="pieChart"></canvas>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Row 2: Gauge + Histogram -->
+      <div class="charts-grid">
+
+        <div class="chart-card">
+          <div class="chart-label"><span class="dot" style="background:#06b6d4"></span>🎯 Success Probability Gauge</div>
+          <div class="chart-wrap gauge" id="gaugeContainer">
+            <canvas id="gaugeChart"></canvas>
+            <div class="gauge-value" id="gaugeValue">50%</div>
+          </div>
+          <div class="gauge-label" style="text-align:center; margin-top:6px; font-size:11px; color:#475569;">
+            Hit Probability
+          </div>
+        </div>
+
+        <div class="chart-card">
+          <div class="chart-label"><span class="dot" style="background:#8b5cf6"></span>📉 Vote Average Distribution</div>
+          <div class="chart-wrap">
+            <canvas id="histChart"></canvas>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Row 3: Line chart (full width) -->
+      <div class="charts-grid">
+        <div class="chart-card full-width">
+          <div class="chart-label"><span class="dot" style="background:#06b6d4"></span>📈 Popularity Bracket → Success Likelihood</div>
+          <div class="chart-wrap tall">
+            <canvas id="lineChart"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <!-- Row 4: Heatmap (full width) -->
+      <div class="charts-grid">
+        <div class="chart-card full-width">
+          <div class="chart-label"><span class="dot" style="background:#f59e0b"></span>🔥 Feature Correlation Heatmap</div>
+          <div id="heatmapGrid" class="heatmap-grid"></div>
+        </div>
+      </div>
+
+    </div>
+    <!-- end right col -->
+  </div>
+  <!-- end main grid -->
+
+</div>
+<!-- end wrapper -->
+
+<!-- Script -->
+<script src="/static/script.js"></script>
+</body>
+</html>
