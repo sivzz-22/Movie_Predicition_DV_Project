@@ -1,12 +1,4 @@
-"""
-train_model.py
-==============
-Train a Random Forest classifier on the TMDB 5000 Movies dataset
-to predict whether a movie will be a HIT (revenue > 100M) or FLOP.
-Saves:
-  - model.pkl          (trained classifier + scaler)
-  - dataset_stats.json (sample stats for frontend charts)
-"""
+
 
 import pandas as pd
 import numpy as np

@@ -1,13 +1,3 @@
-"""
-app.py
-======
-Flask backend for the Movie Success Prediction Dashboard.
-
-Routes:
-  GET  /               → render dashboard (index.html)
-  POST /predict        → return Hit/Flop prediction + probabilities
-  GET  /dataset-stats  → return pre-computed dataset statistics
-"""
 
 import os
 import json

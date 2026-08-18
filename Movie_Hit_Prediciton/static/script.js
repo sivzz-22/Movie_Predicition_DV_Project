@@ -1,14 +1,3 @@
-/**
- * script.js – Movie Success Prediction Dashboard
- * ================================================
- * Handles:
- *  - Form submission & fetch to /predict
- *  - Loading animation
- *  - Dynamic Chart.js charts (Bar, Pie, Line, Histogram, Gauge, Feature Importance)
- *  - Heatmap (Canvas-drawn correlation matrix)
- *  - Dataset stats loaded on page start from /dataset-stats
- *  - Reset button
- */
 
 /* ── Chart.js global defaults ──────────────────────────────── */
 Chart.defaults.color = '#94a3b8';
